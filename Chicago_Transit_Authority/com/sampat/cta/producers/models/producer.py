@@ -1,3 +1,4 @@
+
 """Producer base-class providing common utilites and functionality"""
 import logging
 import time
@@ -102,8 +103,6 @@ class Producer:
             except Exception as exc:
                 logger.error(f"Failed to create topic with name : {topic}: {exc}")
 
-        #logger.info("topic creation kafka integration incomplete - skipping")
-
     def time_millis(self):
         return int(round(time.time() * 1000))
 
@@ -117,11 +116,6 @@ class Producer:
         """Prepares the producer for exit by cleaning up the producer"""
         # TODO: Write cleanup code for the Producer here
         self.producer.flush()
-
-
-    def time_millis(self):
-        """Use this function to get the key for Kafka Events"""
-        return int(round(time.time() * 1000))
 
 
 def delivery_report(err, msg):
