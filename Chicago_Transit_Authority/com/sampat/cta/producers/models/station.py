@@ -27,6 +27,7 @@ class Station(Producer):
     def __init__(self, station_id, name, color, direction_a=None, direction_b=None):
         self.station_id = int(station_id)
         self.color = color
+        self.name= name
         self.dir_a = direction_a
         self.dir_b = direction_b
         self.a_train = None
@@ -35,12 +36,8 @@ class Station(Producer):
 
         station_name = format_station_name(self.name)
 
-        #
-        #
         # TODO: Complete the below by deciding on a topic name, number of partitions, and number of
-        # replicas
-        #
-        #
+
         topic_name = join_topic_name(CtaTopics.ARRIVALS_PREFIX,station_name) # TODO: Come up with a better topic name
         super().__init__(
             topic_name,
