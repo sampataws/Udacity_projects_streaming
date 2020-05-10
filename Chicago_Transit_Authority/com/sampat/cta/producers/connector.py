@@ -3,13 +3,17 @@ import json
 import logging
 
 import requests
+from Chicago_Transit_Authority.com.sampat.cta.producers.models.connection_config import Connections
+from Chicago_Transit_Authority.com.sampat.cta.producers.models.topic_config import CtaTopics
+
 
 
 logger = logging.getLogger(__name__)
 
 
-KAFKA_CONNECT_URL = "http://localhost:8083/connectors"
-CONNECTOR_NAME = "stations"
+KAFKA_CONNECT_URL = f"{Connections.CONNECT}/connectors"
+TOPIC_PREFIX, TABLE_NAME = CtaTopics.STATIONS.rsplit(".", maxsplit=1)
+CONNECTOR_NAME = f"jdbc_source_postgres_{TABLE_NAME}"
 
 def configure_connector():
     """Starts and configures the Kafka Connect connector"""
@@ -33,41 +37,35 @@ def configure_connector():
     # Make sure to think about what an appropriate topic prefix would be, and how frequently Kafka
     # Connect should run this connector (hint: not very often!)
     logger.info("connector code not completed skipping connector creation")
-    #resp = requests.post(
-    #    KAFKA_CONNECT_URL,
-    #    headers={"Content-Type": "application/json"},
-    #    data=json.dumps({
-    #        "name": CONNECTOR_NAME,
-    #        "config": {
-    #            "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
-    #            "key.converter": "org.apache.kafka.connect.json.JsonConverter",
-    #            "key.converter.schemas.enable": "false",
-    #            "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-    #            "value.converter.schemas.enable": "false",
-    #            "batch.max.rows": "500",
-    #            # TODO
-    #            "connection.url": "",
-    #            # TODO
-    #            "connection.user": "",
-    #            # TODO
-    #            "connection.password": "",
-    #            # TODO
-    #            "table.whitelist": "",
-    #            # TODO
-    #            "mode": "",
-    #            # TODO
-    #            "incrementing.column.name": "",
-    #            # TODO
-    #            "topic.prefix": "",
-    #            # TODO
-    #            "poll.interval.ms": "",
-    #        }
-    #    }),
-    #)
+    resp = requests.post(
+        KAFKA_CONNECT_URL,
+        headers={"Content-Type": "application/json"},
+        data=json.dumps(
+            {
+                "name": CONNECTOR_NAME,
+                "config": {
+                    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+                    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+                    "key.converter.schemas.enable": "false",
+                    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+                    "value.converter.schemas.enable": "false",
+                    "batch.max.rows": 500,
+                    "connection.url": Connections.POSTGRES.get("connection.url"),
+                    "connection.user": Connections.POSTGRES.get("user"),
+                    "connection.password": Connections.POSTGRES.get("password"),
+                    "table.whitelist": TABLE_NAME,
+                    "mode": "incrementing",
+                    "incrementing.column.name": "stop_id",
+                    "topic.prefix": f"{TOPIC_PREFIX}.",
+                    "poll.interval.ms": 60000,
+                },
+            }
+        ),
+    )
 
     ## Ensure a healthy response was given
-    #resp.raise_for_status()
-    #logging.debug("connector created successfully")
+    resp.raise_for_status()
+    logging.debug("connector created successfully")
 
 
 if __name__ == "__main__":
