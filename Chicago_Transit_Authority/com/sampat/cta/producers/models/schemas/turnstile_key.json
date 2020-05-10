@@ -1,5 +1,5 @@
 {
-  "namespace": "org.chicago.cta.station",
+  "namespace": "org.chicago.cta.turnstile",
   "type": "record",
   "name": "turnstile.key",
   "fields": [
