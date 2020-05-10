@@ -6,8 +6,8 @@ from confluent_kafka import avro
 
 from Chicago_Transit_Authority.com.sampat.cta.producers.models.producer import Producer
 from Chicago_Transit_Authority.com.sampat.cta.producers.models.turnstile_hardware import TurnstileHardware
-from Chicago_Transit_Authority.com.sampat.cta.producers.models.utils import load_schema,format_station_name,RecordSchema
-from Chicago_Transit_Authority.com.sampat.cta.producers.models.topic_config import CtaTopics,join_topic_name
+from Chicago_Transit_Authority.com.sampat.cta.producers.models.utils import load_schema
+from Chicago_Transit_Authority.com.sampat.cta.producers.models.topic_config import CtaTopics
 
 
 
