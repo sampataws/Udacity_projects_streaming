@@ -7,7 +7,7 @@ SCHEMA_DIR = Path(__file__).parent / "schemas"
 
 def load_schema(schema: str) -> RecordSchema:
     """Load a given Avro schema"""
-    parsed_schema = avro.load(SCHEMA_DIR / schema)
+    parsed_schema = avro.load(SCHEMA_DIR/schema)
     return parsed_schema
 
 def format_station_name(station_name:str)->str:
