@@ -3,6 +3,7 @@ import json
 import logging
 
 from Chicago_Transit_Authority.com.sampat.cta.consumers.models import Station
+from Chicago_Transit_Authority.com.sampat.cta.consumers import connection_config
 
 
 logger = logging.getLogger(__name__)
@@ -56,16 +57,19 @@ class Line:
 
     def process_message(self, message):
         """Given a kafka message, extract data"""
+        topic: str = message.topic()
         # TODO: Based on the message topic, call the appropriate handler.
-        if True: # Set the conditional correctly to the stations Faust Table
+        if topic == connection_config.CtaTopics.STATIONS_LINE:
             try:
                 value = json.loads(message.value())
                 self._handle_station(value)
             except Exception as e:
                 logger.fatal("bad station? %s, %s", value, e)
-        elif True: # Set the conditional to the arrival topic
+            # Set the conditional to the arrival topics
+        elif topic.startswith(connection_config.CtaTopics.ARRIVALS_PREFIX):
             self._handle_arrival(message)
-        elif True: # Set the conditional to the KSQL Turnstile Summary Topic
+            # Set the conditional to the KSQL Turnstile Summary Topic
+        elif topic == connection_config.CtaTopics.TURNSTILES_SUMMARY:
             json_data = json.loads(message.value())
             station_id = json_data.get("STATION_ID")
             station = self.stations.get(station_id)
@@ -74,6 +78,4 @@ class Line:
                 return
             station.process_message(json_data)
         else:
-            logger.debug(
-                "unable to find handler for message from topic %s", message.topic
-            )
+            logger.debug("unable to find handler for message from topic %s", topic)

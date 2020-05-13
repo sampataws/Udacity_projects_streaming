@@ -3,6 +3,7 @@ import json
 import logging
 
 from Chicago_Transit_Authority.com.sampat.cta.consumers.models import Line
+from Chicago_Transit_Authority.com.sampat.cta.consumers import connection_config
 
 
 logger = logging.getLogger(__name__)
@@ -19,9 +20,14 @@ class Lines:
 
     def process_message(self, message):
         """Processes a station message"""
-        if "org.chicago.cta.station" in message.topic():
+        topic: str = message.topic()
+        if topic.startswith(connection_config.CtaTopics.ARRIVALS_PREFIX) or topic in [
+            connection_config.CtaTopics.TURNSTILES,
+            connection_config.CtaTopics.STATIONS,
+            connection_config.CtaTopics.STATIONS_LINE,
+        ]:
             value = message.value()
-            if message.topic() == "org.chicago.cta.stations.table.v1":
+            if topic == connection_config.CtaTopics.STATIONS_LINE:
                 value = json.loads(value)
             if value["line"] == "green":
                 self.green_line.process_message(message)
@@ -30,10 +36,10 @@ class Lines:
             elif value["line"] == "blue":
                 self.blue_line.process_message(message)
             else:
-                logger.debug("discarding unknown line msg %s", value["line"])
-        elif "TURNSTILE_SUMMARY" == message.topic():
+                logger.debug("discarding msg  line with unknown %s", value["line"])
+        elif topic == connection_config.CtaTopics.TURNSTILES_SUMMARY:
             self.green_line.process_message(message)
             self.red_line.process_message(message)
             self.blue_line.process_message(message)
         else:
-            logger.info("ignoring non-lines message %s", message.topic())
+            logger.info("ignoring messaages for no line %s", message.topic())
