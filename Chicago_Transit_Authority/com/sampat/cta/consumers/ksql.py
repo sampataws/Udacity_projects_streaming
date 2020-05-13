@@ -4,14 +4,14 @@ import logging
 
 import requests
 
-import topic_check
+from  Chicago_Transit_Authority.com.sampat.cta.consumers import topic_check
+from Chicago_Transit_Authority.com.sampat.cta.consumers import connection_config
 
 
 logger = logging.getLogger(__name__)
 
 
-KSQL_URL = "http://localhost:8088"
-
+KSQL_URL = connection_config.Connections.KSQL
 #
 # TODO: Complete the following KSQL statements.
 # TODO: For the first statement, create a `turnstile` table from your turnstile topic.
@@ -23,14 +23,25 @@ KSQL_URL = "http://localhost:8088"
 
 KSQL_STATEMENT = """
 CREATE TABLE turnstile (
-    ???
+    station_id INT,
+    station_name STRING,
+    line STRING
 ) WITH (
-    ???
+    KAFKA_TOPIC='{connection_config.CtaTopics.TURNSTILES}',
+    VALUE_FORMAT='AVRO',
+    KEY='station_id'
 );
 
 CREATE TABLE turnstile_summary
-WITH (???) AS
-    ???
+    WITH (
+        KAFKA_TOPIC='{connection_config.CtaTopics.TURNSTILES_SUMMARY}',
+        VALUE_FORMAT='JSON'
+    ) AS
+    SELECT
+        station_id,
+        COUNT(*) AS count
+    FROM turnstile
+    GROUP BY station_id;
 """
 
 

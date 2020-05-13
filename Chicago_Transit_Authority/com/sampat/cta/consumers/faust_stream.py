@@ -36,12 +36,12 @@ app = faust.App("stations-stream", broker=KAFKA_BROKER, store="memory://")
 # TODO: Define the input Kafka Topic. Hint: What topic did Kafka Connect output to?
 topic = app.topic(connection_config.Connections.CtaTopics.STATIONS, value_type=Station)
 # TODO: Define the output Kafka Topic
-out_topic = app.topic(
-    connection_config.Connections.CtaTopics.STATIONS_LINE,
-    key_type=int,
-    value_type=TransformedStation,
-    partitions=1,
-)# TODO: Define a Faust Table
+out_topic = app.topic(connection_config.Connections.CtaTopics.STATIONS_LINE,
+                      key_type=str,
+                      value_type=TransformedStation,
+                      partitions=1
+                      )
+# TODO: Define a Faust Table
 table = app.Table(
     name=connection_config.Connections.CtaTopics.STATIONS_LINE,
     default=TransformedStation,
@@ -72,7 +72,8 @@ async def transform_station(stations):
             line=line,
         )
 
-        table[station.station_id] = transformed_station
+        #table[station.station_id] = transformed_station
+        await out_topic.send(key=station.station_name, value=transformed_station)
 
 
 if __name__ == "__main__":
