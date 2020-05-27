@@ -88,6 +88,7 @@ class KafkaConsumer:
         # is retrieved.
         try:
             msg = self.consumer.poll(self.consume_timeout)
+
         except SerializerError as exc:
             logger.error(f"{self.topic_name_pattern} | {exc}")
             return 0
